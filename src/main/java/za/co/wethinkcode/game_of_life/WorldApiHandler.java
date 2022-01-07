@@ -2,19 +2,68 @@ package za.co.wethinkcode.game_of_life;
 
 import io.javalin.http.Context;
 import kong.unirest.HttpStatus;
+import za.co.wethinkcode.game_of_life.database.DBConnect;
+import za.co.wethinkcode.game_of_life.database.WorldDO;
 import za.co.wethinkcode.game_of_life.domain.World;
 import za.co.wethinkcode.game_of_life.http.requests.CreateRequest;
 import za.co.wethinkcode.game_of_life.http.responses.WorldResponse;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class WorldApiHandler {
 
     public void createNew(Context context) {
         CreateRequest createRequest = context.bodyAsClass(CreateRequest.class);
-        World world = World.define(createRequest.getWorldName(), createRequest.getWorldSize(), createRequest.getWorldInitialState());
+        World world = World.define(
+                createRequest.getWorldName(),
+                createRequest.getWorldSize(),
+                createRequest.getWorldInitialState()
+        );
+
+        DBConnect database = new DBConnect();
+
+        System.out.print("Saving world to database...");
+        if(database.addWorld(
+                world.getWorldName(),
+                world.getEpoch(),
+                world.getWorldSize(),
+                world.getState())) {
+            System.out.println("success!");
+        } else {
+            System.out.println("Failed");
+        }
 
         context.status(HttpStatus.CREATED);
 
-        context.json(new WorldResponse(1, world.getState()));
+        context.json(new WorldResponse(
+                database.getWorld(world.getWorldName()).getId(),
+                world.getState()
+        ));
     }
+
+    private Map toJson(WorldDO world){
+        Map json = new HashMap();
+        json.put("epoch", world.getEpoch());
+        json.put("name", world.getName());
+        json.put("id", world.getId());
+        return json;
+    }
+
+    public void getAllWorlds(Context context) {
+        DBConnect database = new DBConnect();
+
+        context.status(HttpStatus.CREATED);
+
+        List<Object> list = new ArrayList<>();
+        for(WorldDO world:database.getWorlds()){
+            list.add(toJson(world));
+            System.out.println(list);
+        }
+        context.json(list);
+    }
+
 }
 // <SOLUTION>

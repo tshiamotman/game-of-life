@@ -1,6 +1,7 @@
 package za.co.wethinkcode.game_of_life;
 
 import io.javalin.Javalin;
+import za.co.wethinkcode.game_of_life.database.DBConnect;
 
 public class GameServer {
     private final Javalin server;
@@ -13,9 +14,12 @@ public class GameServer {
         WorldApiHandler worldApiHandler = new WorldApiHandler();
         server.post("/world", context -> worldApiHandler.createNew(context));
         // </SOLUTION>
+
+        server.get("/worlds", context -> worldApiHandler.getAllWorlds(context));
     }
 
     public void start(int port) {
+        new DBConnect().init();
         int listen_port = port > 0 ? port : DEFAULT_PORT; // use port if > 0 otherwise use DEFAULT_PORT value
         this.server.start(listen_port);
     }
@@ -25,6 +29,7 @@ public class GameServer {
     }
 
     public static void main(String[] args) {
-        // COMPLETE THIS
+        GameServer gameServer = new GameServer();
+        gameServer.start(gameServer.DEFAULT_PORT);
     }
 }

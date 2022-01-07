@@ -88,7 +88,53 @@ public class WorldApiTest {
     @Test
     @DisplayName("List all worlds: GET /worlds")
     void testListAllWorlds() {
-        // COMPLETE THIS TEST
+        // Arrange
+        int[][] stateOne = new int[][]{
+                {0, 0, 0},
+                {0, 1, 0},
+                {0, 0, 0}
+        };
+        JsonRequest requestOne = JsonRequest.create("DEFINE", Map.of(
+                "name", "Cruel World",
+                "size", 3,
+                "state", stateOne
+        ));
+
+        int[][] stateTwo = new int[][]{
+                {1, 1, 0},
+                {0, 1, 0},
+                {0, 0, 0}
+        };
+        JsonRequest requestTwo = JsonRequest.create("DEFINE", Map.of(
+                "name", "Brave New World",
+                "size", 3,
+                "state", stateTwo
+        ));
+
+        // Act:
+        HttpResponse<JsonNode> respOne = Unirest.post(BASE_URL + "/world")
+                .header("content-type", "application/json")
+                .body(requestOne)
+                .asJson();
+
+        HttpResponse<JsonNode> respTwo = Unirest.post(BASE_URL + "/world")
+                .header("content-type", "application/json")
+                .body(requestTwo)
+                .asJson();
+
+        // Assert:
+        assertThat(respOne.getStatus()).isEqualTo(201); // https://httpstatuses.com/201
+        assertThat(respTwo.getStatus()).isEqualTo(201);
+
+        HttpResponse<JsonNode> resp = Unirest.get(BASE_URL + "/worlds")
+                .header("content-type", "application/json")
+                .asJson();
+
+
+        assertThat(respTwo.getStatus()).isEqualTo(201);
+        JSONArray responseJson = resp.getBody().getArray(); // parse JSON response
+        assertThat(responseJson).isNotNull();
+        assertThat(responseJson.length()).isEqualTo(2);
     }
 
 //    @Test
