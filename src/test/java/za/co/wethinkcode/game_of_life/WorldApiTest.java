@@ -82,7 +82,22 @@ public class WorldApiTest {
     @Test
     @DisplayName("Next epoch/generation: POST /world/{id}/next")
     void testPostToCalculateNextStateOfWorld() {
-        // COMPLETE THIS TEST
+        int[][] worldState = new int[][]{
+                {0, 0, 0},
+                {0, 0, 0},
+                {0, 0, 0}
+        };
+
+        HttpResponse<JsonNode> resp = Unirest.post(BASE_URL + "/world/1/next")
+                .header("content-type", "application/json")
+                .asJson();
+
+        // Assert:
+        assertThat(resp.getStatus()).isEqualTo(201); // https://httpstatuses.com/201
+        JSONObject responseJson = resp.getBody().getObject(); // parse JSON response
+        assertThat(responseJson).isNotNull();
+        assertThat(responseJson.getInt("id")).isGreaterThan(0);
+        assertWorldStatesAreEqual(responseJson.getJSONArray("state"), worldState);
     }
 
     @Test
