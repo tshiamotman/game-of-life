@@ -37,6 +37,8 @@ verify:jdk8:
 test:jdk8:
   stage: test
   script:
+    - java -jar target/game_of_life-1.0-SNAPSHOT.jar&
     - mvn initialize
     - mvn dependency:resolve
     - mvn test 
+    - pkill -f 'java -jar'
