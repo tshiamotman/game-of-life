@@ -37,7 +37,7 @@ public class WorldTest {
 
         int[][] nextState = {
                 {0, 0, 0},
-                {0, 1, 0},
+                {1, 1, 1},
                 {0, 0, 0},
         };
         World world = World.define("test", 2, initialState);
