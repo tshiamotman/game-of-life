@@ -41,9 +41,18 @@ public class World {
         return this.cells;
     }
 
-    public void next() {
+    public boolean next() {
         this.cells = new Generation().solve(cells);
         this.epoch++;
+
+        for(int[] row:cells){
+            for(int i:row){
+                if(i == 1){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public JSONObject toJson(){

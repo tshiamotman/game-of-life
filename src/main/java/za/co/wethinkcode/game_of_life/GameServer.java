@@ -15,6 +15,7 @@ public class GameServer {
 
         server.get("/worlds", context -> worldApiHandler.getAllWorlds(context));
         server.post("/world/{id}/next", context -> worldApiHandler.handleNext(context));
+        server.get("/world/{id}/epoch/{epoch}", context -> worldApiHandler.handleGetEpoch(context));
     }
 
     public void start(int port) {

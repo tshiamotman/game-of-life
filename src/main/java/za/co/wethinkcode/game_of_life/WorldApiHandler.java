@@ -85,4 +85,32 @@ public class WorldApiHandler {
         context.status(HttpStatus.CREATED);
         context.json(response);
     }
+
+    public void handleGetEpoch(Context context){
+        int id = Integer.parseInt(context.pathParam("id"));
+        int epoch = Integer.parseInt(context.pathParam("epoch"));
+
+        DBConnect database = new DBConnect();
+
+        WorldDO worldDO = database.getWorldId(id);
+
+        World world;
+        if(epoch <= worldDO.getEpoch()){
+            world = new World(worldDO.getName(), worldDO.getSize(), epoch);
+            world.setCells(database.getState(worldDO.getId(), epoch, world.getWorldSize()));
+        } else {
+            world = new World(worldDO.getName(), worldDO.getSize(), worldDO.getEpoch());
+            world.setCells(database.getState(worldDO.getId(), world.getEpoch(), world.getWorldSize()));
+            while (world.next()) {
+                if(epoch == world.getEpoch()) break;
+            }
+        }
+        worldDO.setEpoch(world.getEpoch());
+
+        Map response = toJson(worldDO);
+        response.put("state", world.getState());
+
+        context.status(HttpStatus.CREATED);
+        context.json(response);
+    }
 }
