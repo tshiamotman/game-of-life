@@ -14,7 +14,7 @@ public interface WorldDAI extends BaseQuery {
     @Select("SELECT * FROM worlds WHERE name = ?{1}")
     WorldDO getWorld(String name);
 
-    @Select("SELECT * FROM worlds")
+    @Select("SELECT id, name, epoch FROM worlds")
     List<WorldDO> getAllWorlds();
 
     @Select("SELECT * FROM states WHERE worldId = ?{1} AND epoch = ?{2}")

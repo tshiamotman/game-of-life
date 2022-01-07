@@ -11,9 +11,15 @@ import java.util.List;
 public class DBConnect {
     private final String dbUrl = "jdbc:sqlite:gameOfLife.sqlite";
 
-    public DBConnect() throws SQLException {
+    public DBConnect() {
+
+    }
+
+    public void init(){
         try(Connection connection = DriverManager.getConnection(dbUrl)) {
             createTables(connection);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
     }
 
@@ -29,17 +35,17 @@ public class DBConnect {
 
     private int[][] deserialize(String state, int worldSize){
         int rows = state.length()/worldSize;
-        List serial = new ArrayList<>();
+        int[][] serial = new int[rows][worldSize];
         for(int i=0; i < rows; i++){
-            List row = new ArrayList<Integer>();
+            int[] row = new int[worldSize];
             for(int j = 0; j < worldSize; j++){
-                row.add(Integer.parseInt(
+                row[j] = Integer.parseInt(
                         String.valueOf(state.charAt((i * worldSize) + j))
-                ));
+                );
             }
-            serial.add(row.toArray());
+            serial[i] = row;
         }
-        return (int[][]) serial.toArray();
+        return serial;
     }
 
     public boolean addWorld(String name, int epoch, int size, int[][] state){
@@ -47,34 +53,39 @@ public class DBConnect {
 
             WorldDAI dao = QueryTool.getQuery(connection, WorldDAI.class);
 
-            int checkWorld = dao.worldExists(name);
-
-            if(checkWorld == 0) {
+            try {
+                int checkWorld = dao.worldExists(name);
+                return false;
+            } catch (NullPointerException e){
 
                 dao.addWorld(name, epoch, size);
 
                 int worldId = dao.worldExists(name);
 
-                System.out.println("worldID: " + worldId);
-
                 dao.addState(epoch, worldId, serializeState(state));
                 return true;
-            } else {
-                System.out.println("World name already exists");
-                return false;
             }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return false;
+    }
+
+    public WorldDO getWorldId(int id){
+        try (Connection connection = DriverManager.getConnection(dbUrl)){
+            WorldDAI dao = QueryTool.getQuery( connection, WorldDAI.class );
+
+            return dao.getWorld(id);
         } catch (SQLException e){
             throw new RuntimeException( e );
         }
     }
 
-    public WorldDO getWorld(int id){
+    public WorldDO getWorld(String name){
         try (Connection connection = DriverManager.getConnection(dbUrl)){
             WorldDAI dao = QueryTool.getQuery( connection, WorldDAI.class );
 
-            WorldDO world = dao.getWorld(id);
-
-            return world;
+            return dao.getWorld(name);
         } catch (SQLException e){
             throw new RuntimeException( e );
         }
