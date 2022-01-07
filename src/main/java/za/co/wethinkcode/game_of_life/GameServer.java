@@ -10,12 +10,11 @@ public class GameServer {
     public GameServer() {
         server = Javalin.create();
         server.get("/_ping", context -> context.result("pong"));
-        // <SOLUTION>
         WorldApiHandler worldApiHandler = new WorldApiHandler();
         server.post("/world", context -> worldApiHandler.createNew(context));
-        // </SOLUTION>
 
         server.get("/worlds", context -> worldApiHandler.getAllWorlds(context));
+        server.post("/world/{id}/next", context -> worldApiHandler.handleNext(context));
     }
 
     public void start(int port) {

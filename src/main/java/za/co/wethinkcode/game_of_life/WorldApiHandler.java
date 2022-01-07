@@ -3,6 +3,7 @@ package za.co.wethinkcode.game_of_life;
 import io.javalin.http.Context;
 import kong.unirest.HttpStatus;
 import za.co.wethinkcode.game_of_life.database.DBConnect;
+import za.co.wethinkcode.game_of_life.database.StateDO;
 import za.co.wethinkcode.game_of_life.database.WorldDO;
 import za.co.wethinkcode.game_of_life.domain.World;
 import za.co.wethinkcode.game_of_life.http.requests.CreateRequest;
@@ -65,5 +66,23 @@ public class WorldApiHandler {
         context.json(list);
     }
 
+    public void handleNext(Context context) {
+        int id = Integer.parseInt(context.pathParam("id"));
+
+        DBConnect database = new DBConnect();
+
+        WorldDO worldDO = database.getWorldId(id);
+
+        World world = new World(worldDO.getName(), worldDO.getSize(), worldDO.getEpoch());
+        world.setCells(database.getState(worldDO.getId(), world.getEpoch(), world.getWorldSize()));
+
+        world.next();
+        worldDO.setEpoch(world.getEpoch());
+
+        Map response = toJson(worldDO);
+        response.put("state", world.getState());
+
+        context.status(HttpStatus.CREATED);
+        context.json(response);
+    }
 }
-// <SOLUTION>
